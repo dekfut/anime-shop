@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>503 Technical Works - Figuri</title>
+    <style>
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+        @import url("https://fonts.googleapis.com/css2?family=Spectral+SC:wght@400;600&family=Lexend+Mega:wght@400&family=League+Gothic&family=Oswald:wght@700&display=swap");
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --modal-bg: rgba(255, 255, 255, 0.85);
+            --modal-border: rgba(201,184,232,0.4);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121214;
+            --text-color: #f0f0f0;
+            --modal-bg: rgba(30, 30, 36, 0.85);
+            --modal-border: rgba(201,184,232,0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            font-family: "Spectral SC", serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background-color: var(--bg-color);
+            overflow: hidden;
+        }
+
+        .gradient-top-bar {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 86px;
+            background: linear-gradient(90deg, #F2C4CE 0%, #C9B8E8 35%, #B8CCE8 65%, #B8E8D0 100%);
+            z-index: 10;
+        }
+
+        .white-content-area {
+            position: absolute;
+            top: 86px; left: 0; right: 0; bottom: 151px;
+            background-color: var(--bg-color);
+            z-index: 2;
+        }
+
+        .gradient-bottom-bar {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 151px;
+            background: linear-gradient(90deg, #F2C4CE 0%, #C9B8E8 35%, #B8CCE8 65%, #B8E8D0 100%);
+            z-index: 10;
+        }
+
+        .big-503-text {
+            position: absolute;
+            left: 4vw;
+            top: calc(50% - 32px);
+            transform: translateY(-50%) scaleX(1.1);
+            transform-origin: left center;
+            font-size: clamp(160px, 28vw, 420px);
+            font-family: 'Special Gothic Expand', 'Special Gothic Expanded', 'League Gothic', 'Oswald', 'Impact', sans-serif;
+            font-weight: 700;
+            color: #878585;
+            opacity: 0.24;
+            user-select: none;
+            z-index: 4;
+            line-height: 0.85;
+            letter-spacing: -2px;
+        }
+
+        #snow-canvas {
+            position: absolute;
+            top: 86px; left: 0; right: 0; bottom: 151px;
+            width: 100vw;
+            height: calc(100vh - 237px);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .gemini-toast {
+            position: absolute;
+            top: 105px;
+            right: 25px;
+            z-index: 100;
+            background: var(--modal-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--modal-border);
+            border-radius: 20px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            max-width: 340px;
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .gemini-toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .gemini-logo-icon {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(116, 185, 255, 0.4);
+        }
+
+        .gemini-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gemini-toast-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .gemini-toast-title {
+            font-size: 11px;
+            font-family: 'Lexend Mega', sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #74b9ff;
+        }
+
+        .gemini-toast-text {
+            font-size: 12px;
+            font-family: sans-serif;
+            line-height: 1.3;
+            color: var(--text-color);
+        }
+
+        .gemini-reload-btn {
+            background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            color: #ffffff;
+            font-size: 11px;
+            font-family: 'Lexend Mega', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .gemini-reload-btn:hover { transform: scale(1.05); opacity: 0.9; }
+
+        .figuri-card-container {
+            position: absolute;
+            right: 5vw;
+            top: calc(50% - 22vh);
+            width: 52vw;
+            max-width: 745px;
+            height: 52vh;
+            max-height: 473px;
+            background: linear-gradient(90deg, #F2C4CE 0%, #C9B8E8 35%, #B8CCE8 65%, #B8E8D0 100%);
+            opacity: 0.85;
+            border-radius: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            padding: 30px;
+        }
+
+        .manul-cat-container {
+            position: absolute;
+            top: -105px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 106px;
+            pointer-events: none;
+            z-index: 15;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .manul-img-real {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: bottom center;
+            filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0.12));
+        }
+
+        .figuri-title-text {
+            font-size: clamp(60px, 8vw, 130px);
+            font-family: 'Spectral SC', serif;
+            font-weight: 400;
+            color: #000000;
+            letter-spacing: 4px;
+            user-select: none;
+            line-height: 1;
+            margin-top: 10px;
+        }
+
+        .studio-sub-text {
+            margin-top: 25px;
+            font-size: clamp(14px, 1.8vw, 26px);
+            font-family: 'Lexend Mega', sans-serif;
+            font-weight: 400;
+            color: #000000;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .studio-footer-container {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 20;
+        }
+
+        .studio-footer-text {
+            font-size: clamp(14px, 1.8vw, 26px);
+            font-family: 'Lexend Mega', sans-serif;
+            font-weight: 400;
+            color: #000000 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="big-503-text">503</div>
+
+    <!-- Уведомление Gemini с переходом на main.html -->
+    <div class="gemini-toast" id="geminiToast">
+        <div class="gemini-logo-icon">
+            <img src="main/logogemini.png" alt="Gemini Logo" class="gemini-logo-img" onerror="this.src='https://via.placeholder.com/32?text=G'">
+        </div>
+        <div class="gemini-toast-content">
+            <span class="gemini-toast-title">GEMINI ASSISTANT ✨</span>
+            <span class="gemini-toast-text">Технічні роботи завершено! Переходимо на сайт. :3</span>
+            <button class="gemini-reload-btn" onclick="goToMain()">Перейти на сайт 🚀</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <canvas id="snow-canvas"></canvas>
+        <div class="gradient-top-bar"></div>
+        <div class="gradient-bottom-bar"></div>
+        <div class="white-content-area"></div>
+
+        <div class="figuri-card-container">
+            <div class="manul-cat-container">
+                <img src="main/manul.png" alt="Манул" class="manul-img-real">
+            </div>
+            <div class="figuri-title-text">FIGURI</div>
+            <div class="studio-sub-text">NekoVerse studio</div>
+        </div>
+
+        <div class="studio-footer-container">
+            <div class="studio-footer-text">NekoVerse studio ®</div>
+        </div>
+    </div>
+
+    <script>
+        // Функция перехода на main.html
+        function goToMain() {
+            window.location.href = 'main.html';
+        }
+
+        const toast = document.getElementById('geminiToast');
+        
+        function popupToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        setTimeout(popupToast, 1000);
+        setInterval(popupToast, 10000);
+
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 237;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const snowflakes = [];
+        for (let i = 0; i < 45; i++) {
+            snowflakes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 6 + 6,
+                speed: Math.random() * 0.7 + 0.3,
+                drift: Math.random() * 0.4 - 0.2,
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: Math.random() * 0.02 - 0.01,
+                opacity: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        function drawSnowflake(ctx, x, y, size, rotation, opacity) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.strokeStyle = `rgba(240, 244, 255, ${opacity})`;
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, size);
+                ctx.stroke();
+                ctx.rotate(Math.PI / 3);
+            }
+            ctx.restore();
+        }
+
+        function animateSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            snowflakes.forEach(f => {
+                drawSnowflake(ctx, f.x, f.y, f.size, f.rotation, f.opacity);
+                f.y += f.speed;
+                f.x += f.drift;
+                if (f.y > canvas.height + 20) { f.y = -20; f.x = Math.random() * canvas.width; }
+            });
+            requestAnimationFrame(animateSnow);
+        }
+        animateSnow();
+    </script>
+</body>
+</html>

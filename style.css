@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figuri - NekoVerse studio</title>
+    <style>
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+        @import url("https://fonts.googleapis.com/css?family=Spectral+SC:400");
+
+        * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: linear-gradient(135deg, rgba(242,196,206,1) 0%, rgba(201,184,232,1) 40%, rgba(184,204,232,1) 70%, rgba(184,232,208,1) 100%);
+            color: #2c2c35;
+            overflow: hidden; 
+            font-family: "Spectral SC", Helvetica; 
+        }
+        
+        /* Главный контейнер-рамка как на макете */
+        .app-frame {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Кнопка с тремя полосками в левом верхнем углу */
+        .hamburger-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: 48px;
+            height: 48px;
+            background-color: #f2f2f5;
+            border-radius: 12px;
+            border: 1px solid rgba(201,184,232,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 50;
+            padding: 0;
+        }
+        .hamburger-btn:hover {
+            transform: scale(1.06);
+            background-color: #e9e9f0;
+        }
+        .hamburger-icon {
+            width: 20px;
+            height: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hamburger-icon span {
+            display: block;
+            height: 2.5px;
+            width: 100%;
+            background-color: #333333;
+            border-radius: 2px;
+        }
+
+        /* Вертикальный ряд квадратных кнопок слева (сокращенные) */
+        .sidebar-icons-panel {
+            position: absolute;
+            top: 90px;
+            left: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 40;
+        }
+
+        .icon-square-wrapper {
+            position: relative;
+        }
+
+        .icon-square-btn {
+            width: 48px;
+            height: 48px;
+            background-color: #f2f2f5;
+            border-radius: 12px;
+            border: 1px solid rgba(201,184,232,0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+        .icon-square-btn:hover {
+            transform: scale(1.08);
+            background-color: #ffffff;
+            border-color: #c9b8e4;
+        }
+
+        /* Выпадающее меню при наведении на квадратные кнопки */
+        .icon-dropdown {
+            position: absolute;
+            top: 0;
+            left: 60px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border: 2px solid rgba(201,184,232,0.4);
+            display: none;
+            flex-direction: column;
+            min-width: 180px;
+            z-index: 60;
+            overflow: hidden;
+            animation: fadeInMenu 0.25s ease;
+        }
+        .icon-square-wrapper:hover .icon-dropdown {
+            display: flex;
+        }
+
+        @keyframes fadeInMenu {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .dropdown-header {
+            padding: 10px 15px;
+            background: #f9f9fb;
+            font-size: 13px;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dropdown-item {
+            padding: 12px 15px;
+            font-size: 15px;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, rgba(242,196,206,0.3) 0%, rgba(184,232,208,0.3) 100%);
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        /* Боковая шторка для кнопки с тремя полосками */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 300px;
+            height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.15);
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            gap: 15px;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header-box {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .sidebar-item-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background-color: rgba(0, 0, 0, 0.04);
+            border: 1px solid #333;
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: #333;
+            font-family: "Spectral SC", Helvetica;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            text-align: left;
+            width: 100%;
+        }
+        .sidebar-item-btn:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Центральная карточка "FIGURI" точно как на макете */
+        .figuri-card {
+            width: 520px;
+            height: 280px;
+            background: linear-gradient(135deg, rgba(242,196,206,0.6) 0%, rgba(201,184,232,0.6) 50%, rgba(184,232,208,0.6) 100%);
+            border-radius: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border: 2px solid rgba(255,255,255,0.8);
+            margin-left: 120px;
+        }
+
+        .figuri-title {
+            font-size: 72px;
+            letter-spacing: 4px;
+            font-weight: 400;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .studio-label {
+            position: absolute;
+            bottom: 25px;
+            right: 35px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            color: #2c2c35;
+        }
+
+        .bottom-right-studio {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 15px;
+            letter-spacing: 1px;
+            color: #444;
+        }
+
+        /* Экран красивой загрузки (как в школьном проекте) ✨ */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(10, 10, 12, 0.92);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+        #splashScreen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .splash-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .splash-star {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #e94560 0%, #4a90e2 100%);
+            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+            transform: scale(0) rotate(0deg);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), margin 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .splash-star.show {
+            transform: scale(1) rotate(360deg);
+        }
+        .splash-star.shift {
+            margin-right: 180px;
+        }
+
+        .splash-text {
+            position: absolute;
+            left: 80px;
+            font-size: 36px;
+            font-weight: bold;
+            font-family: "Spectral SC", Helvetica;
+            background: linear-gradient(135deg, #f2c4ce 0%, #c9b8e4 50%, #b8e8d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: scale(0.8) translateX(-20px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+        .splash-text.show {
+            opacity: 1;
+            transform: scale(1) translateX(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Экран загрузки при входе ✨ -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div id="splashStar" class="splash-star"></div>
+            <div id="splashText" class="splash-text">GEMINI</div>
+        </div>
+    </div>
+
+    <!-- Боковая шторка по нажатию на 3 полоски -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header-box">
+            <span>МЕНЮ</span>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <button class="sidebar-item-btn" onclick="alert('Головна сторінка')">🏠 Головна</button>
+        <button class="sidebar-item-btn" onclick="alert('Галерея фігур')">✨ Фігури</button>
+        <button class="sidebar-item-btn" onclick="window.open('https://t.me/Nyxorelle', '_blank')">💬 Підтримка</button>
+    </div>
+
+    <div class="app-frame">
+        <div class="main-container">
+            
+            <!-- Кнопка с тремя полосками -->
+            <button class="hamburger-btn" onclick="toggleSidebar()" title="Меню">
+                <div class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+
+            <!-- Вертикальные квадратные кнопки-сокращения слева -->
+            <div class="sidebar-icons-panel">
+                <!-- Кнопка 1 -->
+                <div class="icon-square-wrapper">
+                    <button class="icon-square-btn" onclick="selectCategory(1)">📐</button>
+                    <div class="icon-dropdown">
+                        <div class="dropdown-header">Категорія 1</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Коло')">Коло</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Квадрат')">Квадрат</div>
+                    </div>
+                </div>
+
+                <!-- Кнопка 2 -->
+                <div class="icon-square-wrapper">
+                    <button class="icon-square-btn" onclick="selectCategory(2)">⭐</button>
+                    <div class="icon-dropdown">
+                        <div class="dropdown-header">Категорія 2</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Зірка')">Зірка</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Багатокутник')">Багатокутник</div>
+                    </div>
+                </div>
+
+                <!-- Кнопка 3 -->
+                <div class="icon-square-wrapper">
+                    <button class="icon-square-btn" onclick="selectCategory(3)">🎨</button>
+                    <div class="icon-dropdown">
+                        <div class="dropdown-header">Ефекти</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Градієнт')">Градієнт</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: Тінь')">Тінь</div>
+                    </div>
+                </div>
+
+                <!-- Кнопка 4 -->
+                <div class="icon-square-wrapper">
+                    <button class="icon-square-btn" onclick="selectCategory(4)">📌</button>
+                    <div class="icon-dropdown">
+                        <div class="dropdown-header">Проєкти</div>
+                        <div class="dropdown-item" onclick="alert('Вибрано: IT Step 2026')">IT Step 2026</div>
+                    </div>
+                </div>
+
+                <!-- Кнопка 5 -->
+                <div class="icon-square-wrapper">
+                    <button class="icon-square-btn" onclick="selectCategory(5)">🔮</button>
+                    <div class="icon-dropdown">
+                        <div class="dropdown-header">Інфо</div>
+                        <div class="dropdown-item" onclick="alert('NekoVerse studio production')">Про студію</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Главная карточка FIGURI -->
+            <div class="figuri-card">
+                <div class="figuri-title">FIGURI</div>
+                <div class="studio-label">NekoVerse studio</div>
+            </div>
+
+            <!-- Подпись в правом нижнем углу белого блока -->
+            <div class="bottom-right-studio">NekoVerse studio ®</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Функция анимации заставки при входе ✨
+        function triggerSplashAnimation() {
+            const splash = document.getElementById('splashScreen');
+            const star = document.getElementById('splashStar');
+            const text = document.getElementById('splashText');
+
+            splash.classList.add('active');
+            
+            setTimeout(() => {
+                star.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                star.classList.add('shift');
+                text.classList.add('show');
+            }, 1300);
+
+            setTimeout(() => {
+                splash.classList.remove('active');
+                setTimeout(() => {
+                    star.classList.remove('show', 'shift');
+                    text.classList.remove('show');
+                }, 1200);
+            }, 3400);
+        }
+
+        // Запуск анимации при открытии сайта
+        window.addEventListener('DOMContentLoaded', () => {
+            triggerSplashAnimation();
+        });
+
+        // Открытие/закрытие боковой шторки
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function selectCategory(num) {
+            console.log("Клік по кнопці:", num);
+        }
+    </script>
+</body>
+</html>
